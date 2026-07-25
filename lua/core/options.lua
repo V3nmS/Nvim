@@ -44,7 +44,7 @@ vim.opt.runtimepath:remove("/usr/share/vim/vimfiles")
 
 -- Persistencia de folds entre sesiones
 vim.opt.foldmethod = "expr"
-vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 
 vim.opt.foldenable = true
 vim.opt.foldlevelstart = 99 -- evita que abra todo colapsado al entrar
