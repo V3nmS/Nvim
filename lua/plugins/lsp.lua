@@ -30,19 +30,6 @@ return {
 		"hrsh7th/cmp-nvim-lsp",
 	},
 	config = function()
-		-- Diagnostics: mostrar mensajes con wrap real usando virtual_lines
-		-- (virtual_text no soporta saltos de línea reales, solo trunca en una sola línea)
-		vim.diagnostic.config({
-			virtual_lines = {
-				current_line = true, -- solo expande en la línea del cursor (evita ruido visual)
-			},
-			virtual_text = false,
-			underline = true,
-			signs = true,
-			update_in_insert = false,
-			severity_sort = true,
-		})
-
 		vim.api.nvim_create_autocmd("LspAttach", {
 			group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
 			callback = function(event)
