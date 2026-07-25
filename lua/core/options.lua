@@ -41,34 +41,3 @@ vim.opt.shortmess:append("c") -- Don't give |ins-completion-menu| messages (defa
 vim.opt.iskeyword:append("-") -- Hyphenated words recognized by searches (default: does not include '-')
 vim.opt.formatoptions:remove({ "c", "r", "o" }) -- Don't insert the current comment leader automatically for auto-wrapping comments using 'textwidth', hitting <Enter> in insert mode, or hitting 'o' or 'O' in normal mode. (default: 'croql')
 vim.opt.runtimepath:remove("/usr/share/vim/vimfiles")
-
--- Persistencia de folds entre sesiones
-vim.opt.foldmethod = "expr"
-vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-
-vim.opt.foldenable = true
-vim.opt.foldlevelstart = 99 -- evita que abra todo colapsado al entrar
-
-vim.opt.viewoptions = { "folds", "cursor" }
-
-local view_group = vim.api.nvim_create_augroup("AutoSaveFolds", { clear = true })
-
-vim.api.nvim_create_autocmd({ "BufWinLeave", "BufWritePost", "BufLeave" }, {
-	group = view_group,
-	pattern = "?*",
-	callback = function()
-		if vim.bo.buftype == "" then
-			vim.cmd("silent! mkview")
-		end
-	end,
-})
-
-vim.api.nvim_create_autocmd("BufWinEnter", {
-	group = view_group,
-	pattern = "?*",
-	callback = function()
-		if vim.bo.buftype == "" then
-			vim.cmd("silent! loadview")
-		end
-	end,
-})
