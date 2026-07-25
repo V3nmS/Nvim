@@ -49,6 +49,35 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
+-- ============================================
+-- Persistencia de folds (mkview/loadview)
+-- ============================================
+local fold_group = vim.api.nvim_create_augroup("PersistentFolds", { clear = true })
+
+-- Guarda la vista (folds, cursor, etc) al salir del buffer o al guardar
+vim.api.nvim_create_autocmd({ "BufWinLeave", "BufWritePost" }, {
+	group = fold_group,
+	pattern = "*",
+	callback = function(args)
+		if vim.bo[args.buf].buftype == "" and vim.fn.expand("%") ~= "" then
+			vim.cmd("silent! mkview")
+		end
+	end,
+})
+
+-- Carga la vista al entrar al buffer (con delay para que treesitter alcance a parsear)
+vim.api.nvim_create_autocmd("BufWinEnter", {
+	group = fold_group,
+	pattern = "*",
+	callback = function(args)
+		if vim.bo[args.buf].buftype == "" and vim.fn.expand("%") ~= "" then
+			vim.defer_fn(function()
+				vim.cmd("silent! loadview")
+			end, 10)
+		end
+	end,
+})
+
 -- Cargar plugins
 require("lazy").setup({
 	{ import = "plugins" },
