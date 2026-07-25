@@ -206,15 +206,4 @@ return {
 			vim.lsp.enable(server)
 		end
 	end,
-
-	vim.diagnostics.config({
-		virtual_lines = {
-			current_line = true,
-		},
-		virtual_text = false,
-		underline = true,
-		signs = true,
-		update_in_insert = false,
-		severity_sort = true,
-	}),
 }
