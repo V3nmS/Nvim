@@ -99,7 +99,7 @@ vim.keymap.set("n", "<F5>", function()
 		.. " && "
 		.. vim.fn.shellescape(output)
 
-	vim.cmd("split")
+	vim.cmd("botright split")
 	vim.cmd("resize 15")
 	vim.cmd("terminal " .. cmd)
 end, { noremap = true, silent = true, desc = "Compile and run C++" })
