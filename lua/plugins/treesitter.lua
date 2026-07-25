@@ -3,6 +3,9 @@ return {
 	branch = "main",
 	build = ":TSUpdate",
 	config = function()
+		-- Agrega el subdirectorio runtime/ al rtp para que se detecten los queries
+		vim.opt.rtp:append(vim.fn.stdpath("data") .. "/lazy/nvim-treesitter/runtime")
+
 		require("nvim-treesitter").install({
 			"cpp",
 			"c",
