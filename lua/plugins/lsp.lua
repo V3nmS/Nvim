@@ -30,17 +30,37 @@ return {
 		"hrsh7th/cmp-nvim-lsp",
 	},
 	config = function()
-		-- Diagnostics: mostrar mensajes con wrap real usando virtual_lines
-		-- (virtual_text no soporta saltos de línea reales, solo trunca en una sola línea)
+		-- Diagnostics: mantenemos el diseño original de virtual_text (pill inline)
+		-- pero agregamos un floating window auto-abierto en CursorHold para ver
+		-- el mensaje COMPLETO con wrap real, sin depender del ancho de la ventana.
+		-- (virtual_text no puede wrappear en Neovim — es limitación del core,
+		--  siempre se corta al llegar al borde de la ventana)
 		vim.diagnostic.config({
-			virtual_lines = {
-				current_line = true, -- solo expande en la línea del cursor (evita ruido visual)
+			virtual_text = {
+				prefix = "●",
+				spacing = 4,
 			},
-			virtual_text = false,
 			underline = true,
 			signs = true,
 			update_in_insert = false,
 			severity_sort = true,
+			float = {
+				border = "rounded",
+				source = "if_many", -- muestra el nombre del linter/LSP si hay más de uno
+				focusable = false,
+				wrap = true, -- wrap real dentro del float, sin importar screen size
+				header = "",
+				prefix = "",
+			},
+		})
+
+		-- Auto-abre el float con el diagnóstico completo cuando el cursor
+		-- se detiene sobre una línea con error/warning
+		vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+			group = vim.api.nvim_create_augroup("diagnostic-float-on-hold", { clear = true }),
+			callback = function()
+				vim.diagnostic.open_float(nil, { focusable = false })
+			end,
 		})
 
 		vim.api.nvim_create_autocmd("LspAttach", {
