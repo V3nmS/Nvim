@@ -11,7 +11,10 @@ return {
 		"nvim-lua/plenary.nvim",
 		"nvim-telescope/telescope.nvim",
 	},
-	opts = {
+	-- opts como función: se evalúa DESPUÉS de que el plugin entra al runtimepath,
+	-- si no, el require("obsidian.builtin") de abajo truena.
+	opts = function()
+		return {
 		legacy_commands = false, -- solo `:Obsidian <sub>`, sin los viejos :ObsidianX
 
 		workspaces = {
@@ -109,7 +112,8 @@ return {
 		footer = {
 			enabled = true, -- muestra backlinks/palabras al pie de la nota
 		},
-	},
+		}
+	end,
 
 	config = function(_, opts)
 		require("obsidian").setup(opts)
