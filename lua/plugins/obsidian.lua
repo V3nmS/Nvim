@@ -4,8 +4,10 @@ return {
 	lazy = true,
 	-- Solo carga al abrir un .md dentro del vault (arranque rápido)
 	event = {
-		"BufReadPre " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
-		"BufNewFile " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
+		-- "BufReadPre " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
+		-- "BufNewFile " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
+		"BufReadPre " .. vim.fn.expand("~") .. "/Portafolio/",
+		"BufNewFile " .. vim.fn.expand("~") .. "/Portafolio/",
 	},
 	dependencies = {
 		"nvim-lua/plenary.nvim",
@@ -15,109 +17,109 @@ return {
 	-- si no, el require("obsidian.builtin") de abajo truena.
 	opts = function()
 		return {
-		legacy_commands = false, -- solo `:Obsidian <sub>`, sin los viejos :ObsidianX
+			legacy_commands = false, -- solo `:Obsidian <sub>`, sin los viejos :ObsidianX
 
-		workspaces = {
-			{
-				name = "vault",
-				path = "~/Portafolio/Obsidian-Vault",
+			workspaces = {
+				{
+					name = "vault",
+					path = "~/Portafolio/Obsidian-Vault",
+				},
 			},
-		},
 
-		-- ============================================
-		-- Dónde vive cada cosa
-		-- ============================================
-		notes_subdir = "00-Inbox", -- notas nuevas caen aquí por default
-		new_notes_location = "notes_subdir",
+			-- ============================================
+			-- Dónde vive cada cosa
+			-- ============================================
+			notes_subdir = "00-Inbox", -- notas nuevas caen aquí por default
+			new_notes_location = "notes_subdir",
 
-		daily_notes = {
-			folder = "01-Daily",
-			date_format = "YYYY-MM-DD",
-			template = "Daily.md",
-			default_tags = { "daily" },
-			workdays_only = false, -- también sábados y domingos
-		},
+			daily_notes = {
+				folder = "01-Daily",
+				date_format = "YYYY-MM-DD",
+				template = "Daily.md",
+				default_tags = { "daily" },
+				workdays_only = false, -- también sábados y domingos
+			},
 
-		templates = {
-			folder = "99-Templates",
-			date_format = "YYYY-MM-DD",
-			time_format = "HH:mm",
-		},
+			templates = {
+				folder = "99-Templates",
+				date_format = "YYYY-MM-DD",
+				time_format = "HH:mm",
+			},
 
-		attachments = {
-			folder = "98-Assets",
-		},
+			attachments = {
+				folder = "98-Assets",
+			},
 
-		-- ============================================
-		-- Links y nombres de archivo
-		-- ============================================
-		link = {
-			style = "wiki", -- [[nota]] en vez de [nota](nota.md)
-			format = "shortest",
-			auto_update = true, -- al renombrar/mover, arregla los links que apuntan ahí
-		},
+			-- ============================================
+			-- Links y nombres de archivo
+			-- ============================================
+			link = {
+				style = "wiki", -- [[nota]] en vez de [nota](nota.md)
+				format = "shortest",
+				auto_update = true, -- al renombrar/mover, arregla los links que apuntan ahí
+			},
 
-		-- Nombre de archivo legible (no ID random tipo 1690000000-abc123)
-		note_id_func = require("obsidian.builtin").title_id,
+			-- Nombre de archivo legible (no ID random tipo 1690000000-abc123)
+			note_id_func = require("obsidian.builtin").title_id,
 
-		-- Frontmatter automático de cada nota nueva
-		frontmatter = {
-			enabled = true,
-			func = function(note)
-				if note.title then
-					note:add_alias(note.title)
-				end
-				local out = {
-					id = note.id,
-					aliases = note.aliases,
-					tags = note.tags,
-					created = os.date("%Y-%m-%d"),
-				}
-				-- respeta cualquier campo que hayas metido a mano
-				if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
-					for k, v in pairs(note.metadata) do
-						out[k] = v
+			-- Frontmatter automático de cada nota nueva
+			frontmatter = {
+				enabled = true,
+				func = function(note)
+					if note.title then
+						note:add_alias(note.title)
 					end
-				end
-				return out
-			end,
-		},
-
-		completion = {
-			min_chars = 2,
-			create_new = true, -- autocompletar [[algo-que-no-existe]] la crea
-		},
-
-		picker = {
-			name = "telescope.nvim",
-			note_mappings = {
-				new = "<C-x>", -- crear nota con lo que escribiste
-				insert_link = "<C-l>", -- insertar link a la nota seleccionada
+					local out = {
+						id = note.id,
+						aliases = note.aliases,
+						tags = note.tags,
+						created = os.date("%Y-%m-%d"),
+					}
+					-- respeta cualquier campo que hayas metido a mano
+					if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
+						for k, v in pairs(note.metadata) do
+							out[k] = v
+						end
+					end
+					return out
+				end,
 			},
-		},
 
-		search = {
-			sort_by = "modified",
-			sort_reversed = true,
-		},
+			completion = {
+				min_chars = 2,
+				create_new = true, -- autocompletar [[algo-que-no-existe]] la crea
+			},
 
-		-- Orden al ciclar con <leader>oc:  [ ] -> [~] -> [!] -> [>] -> [x]
-		checkbox = {
-			enabled = true,
-			create_new = true,
-			order = { " ", "~", "!", ">", "x" },
-		},
+			picker = {
+				name = "telescope.nvim",
+				note_mappings = {
+					new = "<C-x>", -- crear nota con lo que escribiste
+					insert_link = "<C-l>", -- insertar link a la nota seleccionada
+				},
+			},
 
-		-- Los iconos/colores de checkbox vienen de los defaults del plugin
-		-- (ui.checkboxes). Si los redefines aquí salta un warning aunque
-		-- ya tengas checkbox.order, así que se dejan tal cual.
-		ui = {
-			enable = true, -- conceal de links, bullets, iconos
-		},
+			search = {
+				sort_by = "modified",
+				sort_reversed = true,
+			},
 
-		footer = {
-			enabled = true, -- muestra backlinks/palabras al pie de la nota
-		},
+			-- Orden al ciclar con <leader>oc:  [ ] -> [~] -> [!] -> [>] -> [x]
+			checkbox = {
+				enabled = true,
+				create_new = true,
+				order = { " ", "~", "!", ">", "x" },
+			},
+
+			-- Los iconos/colores de checkbox vienen de los defaults del plugin
+			-- (ui.checkboxes). Si los redefines aquí salta un warning aunque
+			-- ya tengas checkbox.order, así que se dejan tal cual.
+			ui = {
+				enable = true, -- conceal de links, bullets, iconos
+			},
+
+			footer = {
+				enabled = true, -- muestra backlinks/palabras al pie de la nota
+			},
 		}
 	end,
 
@@ -168,6 +170,11 @@ return {
 		-- Visual: seleccionas texto -> se vuelve link (+ nota nueva con <leader>on)
 		vim.keymap.set("v", "<leader>on", ":<C-u>Obsidian link_new<CR>", { desc = "Nota nueva desde selección" })
 		vim.keymap.set("v", "<leader>ok", ":<C-u>Obsidian link<CR>", { desc = "Linkear selección a nota existente" })
-		vim.keymap.set("v", "<leader>oe", ":<C-u>Obsidian extract_note<CR>", { desc = "Extraer selección a nota nueva" })
+		vim.keymap.set(
+			"v",
+			"<leader>oe",
+			":<C-u>Obsidian extract_note<CR>",
+			{ desc = "Extraer selección a nota nueva" }
+		)
 	end,
 }
