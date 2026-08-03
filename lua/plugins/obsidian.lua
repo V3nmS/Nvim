@@ -2,13 +2,10 @@ return {
 	"obsidian-nvim/obsidian.nvim",
 	version = "*", -- último release estable, no main
 	lazy = true,
-	-- Solo carga al abrir un .md dentro del vault (arranque rápido)
-	-- event = {
-	-- 	"BufReadPre " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
-	-- 	"BufNewFile " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
-	-- },
-	event = "VimEnter",
-	branch = "master",
+	-- Carga siempre (no solo dentro del vault) para poder crear/buscar notas
+	-- desde cualquier lado. VeryLazy en vez de VimEnter: hace lo mismo pero
+	-- después de pintar la UI, así no le pega al tiempo de arranque.
+	event = "VeryLazy",
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		"nvim-telescope/telescope.nvim",
@@ -141,7 +138,58 @@ return {
 		-- <leader>o... = Obsidian
 		map("<leader>oo", "<cmd>Obsidian quick_switch<CR>", "Buscar nota por nombre")
 		map("<leader>of", "<cmd>Obsidian search<CR>", "Grep en el vault")
-		map("<leader>on", "<cmd>Obsidian new<CR>", "Nota nueva")
+		-- ============================================
+		-- Nota nueva SIEMPRE dentro del vault
+		-- ============================================
+		-- El `:Obsidian new` de fábrica abre un prompt con `completion = "file"`,
+		-- que autocompleta contra tu cwd. La nota igual cae en el vault, pero el
+		-- prompt te enseña la carpeta donde estás y confunde. Esto lo reemplaza:
+		-- el autocompletado ofrece las carpetas DEL VAULT, y el input se sanea
+		-- para que no se pueda escapar de ahí ni con rutas absolutas ni con `..`.
+		local vault = vim.fn.expand("~/Portafolio/Obsidian-Vault")
+
+		_G.__v3nom_obsidian_dirs = function(arglead)
+			local dirs = {}
+			for name, type_ in vim.fs.dir(vault) do
+				if type_ == "directory" and not name:match("^%.") then
+					table.insert(dirs, name .. "/")
+				end
+			end
+			table.sort(dirs)
+			if arglead == "" then
+				return dirs
+			end
+			return vim.tbl_filter(function(d)
+				return d:sub(1, #arglead) == arglead
+			end, dirs)
+		end
+
+		vim.cmd([[
+			function! V3nomObsidianDirComplete(ArgLead, CmdLine, CursorPos) abort
+				return v:lua.__v3nom_obsidian_dirs(a:ArgLead)
+			endfunction
+		]])
+
+		local function new_note_in_vault()
+			vim.ui.input({
+				prompt = "Nota nueva (Tab = carpetas del vault): ",
+				completion = "customlist,V3nomObsidianDirComplete",
+			}, function(input)
+				if not input or vim.trim(input) == "" then
+					return
+				end
+				-- Ancla al vault: fuera rutas absolutas, ~ y traversal
+				local id = vim.trim(input):gsub("^~/", ""):gsub("^/+", ""):gsub("%.%./", "")
+				if id == "" then
+					return
+				end
+				require("obsidian.actions").new(id, function(note)
+					note:open({ sync = true })
+				end)
+			end)
+		end
+
+		vim.keymap.set("n", "<leader>on", new_note_in_vault, { desc = "Nota nueva (en el vault)", silent = true })
 		map("<leader>oN", "<cmd>Obsidian new_from_template<CR>", "Nota nueva desde template")
 		map("<leader>ot", "<cmd>Obsidian today<CR>", "Diario de hoy")
 		map("<leader>oy", "<cmd>Obsidian yesterday<CR>", "Diario de ayer")
