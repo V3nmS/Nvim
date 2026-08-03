@@ -27,25 +27,25 @@ return {
 		-- ============================================
 		-- Dónde vive cada cosa
 		-- ============================================
-		notes_subdir = "00-inbox", -- notas nuevas caen aquí por default
+		notes_subdir = "00-Inbox", -- notas nuevas caen aquí por default
 		new_notes_location = "notes_subdir",
 
 		daily_notes = {
-			folder = "01-diario",
+			folder = "01-Daily",
 			date_format = "YYYY-MM-DD",
-			template = "diario.md",
-			default_tags = { "diario" },
+			template = "Daily.md",
+			default_tags = { "daily" },
 			workdays_only = false, -- también sábados y domingos
 		},
 
 		templates = {
-			folder = "99-templates",
+			folder = "99-Templates",
 			date_format = "YYYY-MM-DD",
 			time_format = "HH:mm",
 		},
 
 		attachments = {
-			folder = "98-assets",
+			folder = "98-Assets",
 		},
 
 		-- ============================================
