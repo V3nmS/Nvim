@@ -71,7 +71,7 @@ return {
 					id = note.id,
 					aliases = note.aliases,
 					tags = note.tags,
-					creado = os.date("%Y-%m-%d"),
+					created = os.date("%Y-%m-%d"),
 				}
 				-- respeta cualquier campo que hayas metido a mano
 				if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
