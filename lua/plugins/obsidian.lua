@@ -3,10 +3,12 @@ return {
 	version = "*", -- último release estable, no main
 	lazy = true,
 	-- Solo carga al abrir un .md dentro del vault (arranque rápido)
-	event = {
-		"BufReadPre " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
-		"BufNewFile " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
-	},
+	-- event = {
+	-- 	"BufReadPre " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
+	-- 	"BufNewFile " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
+	-- },
+	event = "VimEnter",
+	branch = "master",
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		"nvim-telescope/telescope.nvim",
