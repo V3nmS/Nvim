@@ -61,24 +61,27 @@ return {
 		note_id_func = require("obsidian.builtin").title_id,
 
 		-- Frontmatter automático de cada nota nueva
-		note_frontmatter_func = function(note)
-			if note.title then
-				note:add_alias(note.title)
-			end
-			local out = {
-				id = note.id,
-				aliases = note.aliases,
-				tags = note.tags,
-				creado = os.date("%Y-%m-%d"),
-			}
-			-- respeta cualquier campo que hayas metido a mano
-			if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
-				for k, v in pairs(note.metadata) do
-					out[k] = v
+		frontmatter = {
+			enabled = true,
+			func = function(note)
+				if note.title then
+					note:add_alias(note.title)
 				end
-			end
-			return out
-		end,
+				local out = {
+					id = note.id,
+					aliases = note.aliases,
+					tags = note.tags,
+					creado = os.date("%Y-%m-%d"),
+				}
+				-- respeta cualquier campo que hayas metido a mano
+				if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
+					for k, v in pairs(note.metadata) do
+						out[k] = v
+					end
+				end
+				return out
+			end,
+		},
 
 		completion = {
 			min_chars = 2,
@@ -98,8 +101,15 @@ return {
 			sort_reversed = true,
 		},
 
+		-- Orden al ciclar con <leader>oc:  [ ] -> [~] -> [!] -> [>] -> [x]
+		checkbox = {
+			enabled = true,
+			create_new = true,
+			order = { " ", "~", "!", ">", "x" },
+		},
+
 		ui = {
-			enable = true, -- checkboxes bonitos, conceal de links
+			enable = true, -- solo estética: cómo se dibuja cada estado
 			checkboxes = {
 				[" "] = { char = "󰄱", hl_group = "ObsidianTodo" },
 				["x"] = { char = "", hl_group = "ObsidianDone" },
