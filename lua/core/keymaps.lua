@@ -20,7 +20,6 @@ vim.keymap.set("n", "<C-ww>", "<cmd> q! <CR>", opts)
 vim.keymap.set("n", "x", '"_x', opts)
 
 -- Best Editing
-vim.keymap.set("i", "jj", "i", opts)
 
 -- Vertical scroll and center
 vim.keymap.set("n", "<C-d>", "<C-d>zz", opts)
