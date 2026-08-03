@@ -1,17 +1,19 @@
 return {
 	"obsidian-nvim/obsidian.nvim",
-	version = "*", -- usa el último release estable, no main
+	version = "*", -- último release estable, no main
 	lazy = true,
-	-- Solo carga cuando abres un .md dentro del vault (arranque rápido)
+	-- Solo carga al abrir un .md dentro del vault (arranque rápido)
 	event = {
 		"BufReadPre " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
 		"BufNewFile " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
 	},
 	dependencies = {
-		"nvim-lua/plenary.nvim", -- requerido
-		"nvim-telescope/telescope.nvim", -- picker
+		"nvim-lua/plenary.nvim",
+		"nvim-telescope/telescope.nvim",
 	},
 	opts = {
+		legacy_commands = false, -- solo `:Obsidian <sub>`, sin los viejos :ObsidianX
+
 		workspaces = {
 			{
 				name = "vault",
@@ -27,33 +29,33 @@ return {
 
 		daily_notes = {
 			folder = "01-diario",
-			date_format = "%Y-%m-%d",
-			alias_format = "%d de %B, %Y",
+			date_format = "YYYY-MM-DD",
 			template = "diario.md",
+			default_tags = { "diario" },
+			workdays_only = false, -- también sábados y domingos
 		},
 
 		templates = {
 			folder = "99-templates",
-			date_format = "%Y-%m-%d",
-			time_format = "%H:%M",
+			date_format = "YYYY-MM-DD",
+			time_format = "HH:mm",
 		},
 
 		attachments = {
-			img_folder = "98-assets",
+			folder = "98-assets",
 		},
 
 		-- ============================================
-		-- Comportamiento
+		-- Links y nombres de archivo
 		-- ============================================
-		-- Nombre de archivo: usa el título que escribes, no un ID random.
-		-- Si no das título, cae a timestamp para no colisionar.
-		note_id_func = function(title)
-			if title ~= nil then
-				-- minúsculas, sin acentos raros, guiones en vez de espacios
-				return title:gsub(" ", "-"):gsub("[^A-Za-z0-9-_À-ÿ]", ""):lower()
-			end
-			return tostring(os.time())
-		end,
+		link = {
+			style = "wiki", -- [[nota]] en vez de [nota](nota.md)
+			format = "shortest",
+			auto_update = true, -- al renombrar/mover, arregla los links que apuntan ahí
+		},
+
+		-- Nombre de archivo legible (no ID random tipo 1690000000-abc123)
+		note_id_func = require("obsidian.builtin").title_id,
 
 		-- Frontmatter automático de cada nota nueva
 		note_frontmatter_func = function(note)
@@ -75,26 +77,23 @@ return {
 			return out
 		end,
 
-		-- Enlaces como [[nota|Alias bonito]] al autocompletar
-		wiki_link_func = "prepend_note_id",
-		preferred_link_style = "wiki",
-
 		completion = {
-			nvim_cmp = true, -- ya tienes nvim-cmp
 			min_chars = 2,
+			create_new = true, -- autocompletar [[algo-que-no-existe]] la crea
 		},
 
 		picker = {
 			name = "telescope.nvim",
+			note_mappings = {
+				new = "<C-x>", -- crear nota con lo que escribiste
+				insert_link = "<C-l>", -- insertar link a la nota seleccionada
+			},
 		},
 
-		-- Abrir URLs / imágenes con el visor del sistema
-		follow_url_func = function(url)
-			vim.fn.jobstart({ "xdg-open", url })
-		end,
-		follow_img_func = function(img)
-			vim.fn.jobstart({ "xdg-open", img })
-		end,
+		search = {
+			sort_by = "modified",
+			sort_reversed = true,
+		},
 
 		ui = {
 			enable = true, -- checkboxes bonitos, conceal de links
@@ -106,13 +105,22 @@ return {
 				["!"] = { char = "", hl_group = "ObsidianImportant" },
 			},
 		},
+
+		footer = {
+			enabled = true, -- muestra backlinks/palabras al pie de la nota
+		},
 	},
 
 	config = function(_, opts)
 		require("obsidian").setup(opts)
 
-		-- conceal necesario para que los [[links]] se vean limpios
-		vim.opt_local.conceallevel = 2
+		-- conceal para que los [[links]] se vean limpios
+		vim.api.nvim_create_autocmd("FileType", {
+			pattern = "markdown",
+			callback = function()
+				vim.opt_local.conceallevel = 2
+			end,
+		})
 
 		local map = function(lhs, rhs, desc)
 			vim.keymap.set("n", lhs, rhs, { desc = desc, silent = true })
@@ -122,35 +130,34 @@ return {
 		map("<leader>oo", "<cmd>Obsidian quick_switch<CR>", "Buscar nota por nombre")
 		map("<leader>of", "<cmd>Obsidian search<CR>", "Grep en el vault")
 		map("<leader>on", "<cmd>Obsidian new<CR>", "Nota nueva")
+		map("<leader>oN", "<cmd>Obsidian new_from_template<CR>", "Nota nueva desde template")
 		map("<leader>ot", "<cmd>Obsidian today<CR>", "Diario de hoy")
 		map("<leader>oy", "<cmd>Obsidian yesterday<CR>", "Diario de ayer")
 		map("<leader>ob", "<cmd>Obsidian backlinks<CR>", "Qué notas apuntan a esta")
 		map("<leader>ol", "<cmd>Obsidian links<CR>", "Links salientes de esta nota")
 		map("<leader>og", "<cmd>Obsidian tags<CR>", "Buscar por tag")
-		map("<leader>oT", "<cmd>Obsidian template<CR>", "Insertar template")
+		map("<leader>oT", "<cmd>Obsidian template<CR>", "Insertar template aquí")
 		map("<leader>or", "<cmd>Obsidian rename<CR>", "Renombrar nota (actualiza links)")
 		map("<leader>op", "<cmd>Obsidian paste_img<CR>", "Pegar imagen del clipboard")
 		map("<leader>oc", "<cmd>Obsidian toggle_checkbox<CR>", "Toggle checkbox")
 		map("<leader>oO", "<cmd>Obsidian open<CR>", "Abrir esta nota en la app")
+		map("<leader>ow", "<cmd>Obsidian workspace<CR>", "Cambiar de vault")
 
-		-- gf funciona sobre [[wikilinks]]
-		vim.keymap.set("n", "gf", function()
-			if require("obsidian").util.cursor_on_markdown_link() then
-				return "<cmd>Obsidian follow_link<CR>"
+		-- gf y <CR> siguen [[wikilinks]]
+		local follow = function(fallback)
+			return function()
+				if require("obsidian").util.cursor_on_markdown_link() then
+					return "<cmd>Obsidian follow_link<CR>"
+				end
+				return fallback
 			end
-			return "gf"
-		end, { noremap = false, expr = true, desc = "Seguir link" })
+		end
+		vim.keymap.set("n", "gf", follow("gf"), { expr = true, desc = "Seguir link" })
+		vim.keymap.set("n", "<CR>", follow("<CR>"), { expr = true, desc = "Seguir link" })
 
-		-- Enter también sigue el link (más natural para navegar)
-		vim.keymap.set("n", "<CR>", function()
-			if require("obsidian").util.cursor_on_markdown_link() then
-				return "<cmd>Obsidian follow_link<CR>"
-			end
-			return "<CR>"
-		end, { noremap = false, expr = true, buffer = true, desc = "Seguir link" })
-
-		-- Crear nota desde selección visual: seleccionas texto -> se vuelve link + nota
+		-- Visual: seleccionas texto -> se vuelve link (+ nota nueva con <leader>on)
 		vim.keymap.set("v", "<leader>on", ":<C-u>Obsidian link_new<CR>", { desc = "Nota nueva desde selección" })
 		vim.keymap.set("v", "<leader>ok", ":<C-u>Obsidian link<CR>", { desc = "Linkear selección a nota existente" })
+		vim.keymap.set("v", "<leader>oe", ":<C-u>Obsidian extract_note<CR>", { desc = "Extraer selección a nota nueva" })
 	end,
 }
