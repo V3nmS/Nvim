@@ -108,15 +108,11 @@ return {
 			order = { " ", "~", "!", ">", "x" },
 		},
 
+		-- Los iconos/colores de checkbox vienen de los defaults del plugin
+		-- (ui.checkboxes). Si los redefines aquí salta un warning aunque
+		-- ya tengas checkbox.order, así que se dejan tal cual.
 		ui = {
-			enable = true, -- solo estética: cómo se dibuja cada estado
-			checkboxes = {
-				[" "] = { char = "󰄱", hl_group = "ObsidianTodo" },
-				["x"] = { char = "", hl_group = "ObsidianDone" },
-				[">"] = { char = "", hl_group = "ObsidianRightArrow" },
-				["~"] = { char = "󰰱", hl_group = "ObsidianTilde" },
-				["!"] = { char = "", hl_group = "ObsidianImportant" },
-			},
+			enable = true, -- conceal de links, bullets, iconos
 		},
 
 		footer = {
