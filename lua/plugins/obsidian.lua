@@ -4,10 +4,8 @@ return {
 	lazy = true,
 	-- Solo carga al abrir un .md dentro del vault (arranque rápido)
 	event = {
-		-- "BufReadPre " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
-		-- "BufNewFile " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
-		"BufReadPre " .. vim.fn.expand("~") .. "/Portafolio/",
-		"BufNewFile " .. vim.fn.expand("~") .. "/Portafolio/",
+		"BufReadPre " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
+		"BufNewFile " .. vim.fn.expand("~") .. "/Portafolio/Obsidian-Vault/**.md",
 	},
 	dependencies = {
 		"nvim-lua/plenary.nvim",
