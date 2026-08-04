@@ -2,9 +2,15 @@ return {
 	"obsidian-nvim/obsidian.nvim",
 	version = "*", -- último release estable, no main
 	lazy = true,
-	-- Carga siempre (no solo dentro del vault) para poder crear/buscar notas
-	-- desde cualquier lado. VeryLazy en vez de VimEnter: hace lo mismo pero
-	-- después de pintar la UI, así no le pega al tiempo de arranque.
+	-- Dos disparadores, gana el que ocurra primero:
+	--   ft      -> al abrir un markdown. IMPRESCINDIBLE: el plugin mete su
+	--              lógica dentro de un autocmd FileType, así que si carga
+	--              después (VeryLazy/VimEnter disparan hasta UIEnter, ya
+	--              leído el archivo) ese evento ya pasó y el buffer se queda
+	--              sin UI. Con `ft`, lazy re-emite el FileType al cargar.
+	--   event   -> para tener los comandos disponibles desde cualquier buffer
+	--              (crear nota desde un .cpp, por ejemplo).
+	ft = { "markdown", "quarto" },
 	event = "VeryLazy",
 	dependencies = {
 		"nvim-lua/plenary.nvim",
