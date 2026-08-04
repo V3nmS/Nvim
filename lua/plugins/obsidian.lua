@@ -137,6 +137,48 @@ return {
 			end,
 		})
 
+		-- ============================================
+		-- Resincronizar `id:` con el nombre del archivo
+		-- ============================================
+		-- `:Obsidian rename` (v3.16.6) reescribe el archivo y todos los links,
+		-- pero deja el `id:` del frontmatter con el nombre viejo. Renombrar a
+		-- mano con `mv` hace lo mismo. Esto lo corrige al guardar.
+		--
+		-- Va en `ObsidianNoteWritePre` a propósito: el plugin lo dispara justo
+		-- ANTES de su propio `update_frontmatter`, así que él relee el buffer y
+		-- persiste el id nuevo. El nombre viejo se conserva como alias para que
+		-- ningún link que aún lo use se rompa.
+		vim.api.nvim_create_autocmd("User", {
+			pattern = "ObsidianNoteWritePre",
+			group = vim.api.nvim_create_augroup("ObsidianSyncId", { clear = true }),
+			callback = function(ev)
+				local buf = ev.buf or vim.api.nvim_get_current_buf()
+				if not vim.b[buf].obsidian_buffer then
+					return
+				end
+
+				local fname = vim.api.nvim_buf_get_name(buf)
+				if fname == "" then
+					return
+				end
+				local stem = vim.fn.fnamemodify(fname, ":t:r")
+
+				local ok, note = pcall(require("obsidian.note").from_buffer, buf)
+				if not ok or not note or not note.id or note.id == stem then
+					return
+				end
+				-- Reusa las exclusiones del propio plugin: templates, archivos
+				-- ignorados, README/CHANGELOG, etc.
+				if not note.has_frontmatter or not note:should_save_frontmatter() then
+					return
+				end
+
+				note:add_alias(note.id) -- el nombre viejo sigue resolviendo
+				note.id = stem
+				note:save_to_buffer({ bufnr = buf })
+			end,
+		})
+
 		local map = function(lhs, rhs, desc)
 			vim.keymap.set("n", lhs, rhs, { desc = desc, silent = true })
 		end
