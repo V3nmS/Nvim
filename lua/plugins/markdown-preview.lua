@@ -23,6 +23,19 @@ return {
 		vim.fn["mkdp#util#install"]()
 	end,
 
+	-- El keymap va aquí y NO en `config`: con carga perezosa, `config` solo corre
+	-- cuando el plugin ya cargó, así que un keymap definido ahí nunca existiría
+	-- para dispararlo. `keys` registra un stub que carga el plugin al presionarlo.
+	-- El `ft` lo hace buffer-local: <leader>mp solo vive dentro de un markdown.
+	keys = {
+		{
+			"<leader>mp",
+			"<cmd>MarkdownPreviewToggle<CR>",
+			ft = "markdown",
+			desc = "Preview de markdown (chromium a la derecha)",
+		},
+	},
+
 	-- Las vim.g.mkdp_* van en `init`, NO en `config`: el plugin las lee al
 	-- cargarse. Si las pones en config ya es tarde y se queda con los defaults.
 	init = function()
@@ -93,14 +106,5 @@ return {
 		]])
 
 		vim.g.mkdp_browserfunc = "V3nomMkdpOpen"
-	end,
-
-	config = function()
-		vim.keymap.set(
-			"n",
-			"<leader>mp",
-			"<cmd>MarkdownPreviewToggle<CR>",
-			{ desc = "Preview de markdown (chromium a la derecha)", silent = true }
-		)
 	end,
 }
