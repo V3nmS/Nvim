@@ -116,8 +116,15 @@ return {
 			-- Los iconos/colores de checkbox vienen de los defaults del plugin
 			-- (ui.checkboxes). Si los redefines aquí salta un warning aunque
 			-- ya tengas checkbox.order, así que se dejan tal cual.
+			--
+			-- APAGADO desde que entró render-markdown.nvim (ver plugins/markdown.lua).
+			-- Los dos ponen conceal y extmarks sobre las mismas líneas; corriendo
+			-- juntos se pisan y el buffer parpadea o se dibuja a medias. El propio
+			-- obsidian.nvim documenta que con render-markdown esto va en false.
+			-- No se pierde nada: allá están los mismos iconos, incluidos los
+			-- checkboxes [~] [!] [>] de `checkbox.order` de arriba.
 			ui = {
-				enable = true, -- conceal de links, bullets, iconos
+				enable = false,
 			},
 
 			footer = {
