@@ -84,18 +84,28 @@ return {
 		-- El puente vimscript->lua es el mismo patrón que usas en obsidian.lua para
 		-- el autocompletado de carpetas: el plugin hace `call Func(url)` en
 		-- vimscript, así que la función tiene que existir de ese lado.
+		-- OJO CON --class: en Wayland chromium la ignora por completo. Es una flag
+		-- de X11. Verificado en tu máquina: lanzándolo con --class=mdpreview,
+		-- Hyprland reportaba `chrome-localhost__-Default`.
+		--
+		-- El app_id real que chromium publica en Wayland tiene la forma
+		--     chrome-<host_de_la_url>__-<nombre_del_perfil>
+		-- así que la palanca para controlarlo es `--profile-directory`, no --class.
+		-- Con --profile-directory=mdpreview el app_id queda en
+		--     chrome-localhost__-mdpreview
+		-- que es único y no cambia aunque el servidor agarre otro puerto.
+		-- Ese string es el que matchea la regla en windowrules.lua: si cambias uno,
+		-- cambia el otro.
 		_G.__v3nom_mkdp_open = function(url)
 			vim.fn.jobstart({
 				"chromium",
 				-- Modo app: ventana limpia, sin barra de direcciones ni pestañas.
 				"--app=" .. url,
-				-- La etiqueta con la que Hyprland lo caza para tilearlo. Si cambias
-				-- esto, cambia también la regla en windowrules.lua.
-				"--class=mdpreview",
-				-- Perfil aparte: no toca tu sesión, tus cookies ni tus extensiones,
-				-- y evita que chromium se "reconecte" a una instancia ya abierta
-				-- (que ignoraría --class y abriría una pestaña en tu ventana normal).
+				-- Perfil aparte: no toca tu sesión, cookies ni extensiones, y evita
+				-- que chromium se "reconecte" a tu instancia normal y abra el preview
+				-- como una pestaña más (donde ninguna regla de ventana aplicaría).
 				"--user-data-dir=" .. vim.fn.expand("~/.cache/mdpreview-chromium"),
+				"--profile-directory=mdpreview",
 				"--no-first-run",
 				"--no-default-browser-check",
 			}, { detach = true })
