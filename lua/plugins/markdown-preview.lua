@@ -19,9 +19,11 @@ return {
 	-- pides el preview, así que abrir un .md cualquiera no cuesta nada.
 	cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
 	ft = { "markdown" },
-	build = function()
-		vim.fn["mkdp#util#install"]()
-	end,
+	-- El build documentado es `vim.fn["mkdp#util#install"]()`, pero truena con
+	-- E117: lazy corre el build justo después del clone, cuando el plugin todavía
+	-- no está en el runtimepath y su autoload no existe. Llamar al script directo
+	-- se salta el problema; hace lo mismo: baja el binario del servidor a app/bin.
+	build = "cd app && bash install.sh",
 
 	-- El keymap va aquí y NO en `config`: con carga perezosa, `config` solo corre
 	-- cuando el plugin ya cargó, así que un keymap definido ahí nunca existiría
