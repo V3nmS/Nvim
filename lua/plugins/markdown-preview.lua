@@ -89,13 +89,14 @@ return {
 		-- Hyprland reportaba `chrome-localhost__-Default`.
 		--
 		-- El app_id real que chromium publica en Wayland tiene la forma
-		--     chrome-<host_de_la_url>__-<nombre_del_perfil>
+		--     chrome-<host>_<path_de_la_url>-<nombre_del_perfil>
 		-- así que la palanca para controlarlo es `--profile-directory`, no --class.
-		-- Con --profile-directory=mdpreview el app_id queda en
-		--     chrome-localhost__-mdpreview
-		-- que es único y no cambia aunque el servidor agarre otro puerto.
-		-- Ese string es el que matchea la regla en windowrules.lua: si cambias uno,
-		-- cambia el otro.
+		-- Con --profile-directory=mdpreview el app_id sale, por ejemplo:
+		--     chrome-localhost__page_1-mdpreview
+		--
+		-- El `page_1` de en medio es el path (/page/1) y cambia de número con cada
+		-- buffer, así que la regla de Hyprland ancla al sufijo `-mdpreview`, que es
+		-- lo único bajo nuestro control. Cambiar este perfil rompe esa regla.
 		_G.__v3nom_mkdp_open = function(url)
 			vim.fn.jobstart({
 				"chromium",
