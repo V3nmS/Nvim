@@ -86,6 +86,15 @@ vim.keymap.set("n", "<leader><CR>", "o<Esc>", { noremap = true, silent = true })
 -- Neotree
 -- vim.keymap.set("n", "<C-e>", ":Neotree toggle<CR>", { silent = true }
 
+vim.keymap.set("n", "<F6>", function()
+	vim.cmd("w")
+	local file = vim.fn.expand("%:p")
+	local cmd = "python3 " .. vim.fn.shellescape(file)
+	vim.cmd("botright split")
+	vim.cmd("resize 15")
+	vim.cmd("terminal " .. cmd)
+end, { noremap = true, silent = true, desc = "Run Python" })
+
 vim.keymap.set("n", "<F5>", function()
 	vim.cmd("w")
 
