@@ -86,6 +86,7 @@ vim.keymap.set("n", "<leader><CR>", "o<Esc>", { noremap = true, silent = true })
 -- Neotree
 -- vim.keymap.set("n", "<C-e>", ":Neotree toggle<CR>", { silent = true }
 
+-- Python Keymap
 vim.keymap.set("n", "<F6>", function()
 	vim.cmd("w")
 	local file = vim.fn.expand("%:p")
@@ -95,6 +96,7 @@ vim.keymap.set("n", "<F6>", function()
 	vim.cmd("terminal " .. cmd)
 end, { noremap = true, silent = true, desc = "Run Python" })
 
+-- C++ Keymap
 vim.keymap.set("n", "<F5>", function()
 	vim.cmd("w")
 
