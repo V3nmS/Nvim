@@ -86,34 +86,33 @@ vim.keymap.set("n", "<leader><CR>", "o<Esc>", { noremap = true, silent = true })
 -- Neotree
 -- vim.keymap.set("n", "<C-e>", ":Neotree toggle<CR>", { silent = true }
 
--- Python Keymap
-vim.keymap.set("n", "<F6>", function()
-	vim.cmd("w")
-	local file = vim.fn.expand("%:p")
-	local cmd = "python3 " .. vim.fn.shellescape(file)
-	vim.cmd("botright split")
-	vim.cmd("resize 15")
-	vim.cmd("terminal " .. cmd)
-end, { noremap = true, silent = true, desc = "Run Python" })
+-- Python / C++ Keymap
 
--- C++ Keymap
 vim.keymap.set("n", "<F5>", function()
 	vim.cmd("w")
-
+	local ext = vim.fn.expand("%:e")
 	local file = vim.fn.expand("%:p")
-	local output = vim.fn.expand("%:p:r")
+	local cmd
 
-	local cmd = "g++ -std=c++20 "
-		.. vim.fn.shellescape(file)
-		.. " -o "
-		.. vim.fn.shellescape(output)
-		.. " && "
-		.. vim.fn.shellescape(output)
+	if ext == "cpp" or ext == "cc" or ext == "cxx" then
+		local output = vim.fn.expand("%:p:r")
+		cmd = "g++ -std=c++20 "
+			.. vim.fn.shellescape(file)
+			.. " -o "
+			.. vim.fn.shellescape(output)
+			.. " && "
+			.. vim.fn.shellescape(output)
+	elseif ext == "py" then
+		cmd = "python3 " .. vim.fn.shellescape(file)
+	else
+		print("No hay runner configurado para ." .. ext)
+		return
+	end
 
 	vim.cmd("botright split")
 	vim.cmd("resize 15")
 	vim.cmd("terminal " .. cmd)
-end, { noremap = true, silent = true, desc = "Compile and run C++" })
+end, { noremap = true, silent = true, desc = "Compile/Run C++ or Python" })
 
 local keymap = vim.keymap
 
