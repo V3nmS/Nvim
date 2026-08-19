@@ -313,4 +313,18 @@ return {
 		end,
 		ft = { "markdown" },
 	},
+
+	{
+		"dhruvasagar/vim-table-mode",
+		ft = { "markdown" },
+		config = function()
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "markdown",
+				group = vim.api.nvim_create_augroup("V3nomTableModeAuto", { clear = true }),
+				callback = function()
+					vim.cmd("TableModeEnable")
+				end,
+			})
+		end,
+	},
 }
