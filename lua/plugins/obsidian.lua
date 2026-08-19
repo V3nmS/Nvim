@@ -274,14 +274,6 @@ return {
 		)
 	end,
 
-	-- Pretty markdown
-	{
-		"MeanderingProgrammer/render-markdown.nvim",
-		enabled = false,
-		opts = {},
-		dependencies = { "nvim-treesitter/nvim-treesitter" },
-	},
-
 	{
 		"iamcco/markdown-preview.nvim",
 		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
