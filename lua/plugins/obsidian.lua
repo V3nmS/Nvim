@@ -277,9 +277,31 @@ return {
 	-- Pretty markdown
 	{
 		"MeanderingProgrammer/render-markdown.nvim",
-		enabled = false,
-		opts = {},
+		ft = { "markdown" },
 		dependencies = { "nvim-treesitter/nvim-treesitter" },
+		opts = {
+			heading = {
+				enabled = true,
+				sign = false, -- sin ícono en la sign column
+				border = false, -- sin la barra que parece subrayado
+				width = "block", -- fondo solo cubre el texto, no toda la línea
+				left_pad = 0,
+				right_pad = 0,
+			},
+			bullet = {
+				enabled = false, -- sin ●/○, usa el - / * crudo
+			},
+			table = {
+				enabled = true,
+				style = "full", -- bordes completos tipo tabla real
+			},
+			anti_conceal = {
+				enabled = true,
+				ignore = {
+					table_border = false, -- la tabla se queda renderizada aunque el cursor esté encima
+				},
+			},
+		},
 	},
 
 	{
