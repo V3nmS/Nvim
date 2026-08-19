@@ -281,7 +281,7 @@ return {
 		dependencies = { "nvim-treesitter/nvim-treesitter" },
 		opts = {
 			heading = {
-				enabled = true,
+				enabled = false,
 				sign = false, -- sin ícono en la sign column
 				border = false, -- sin la barra que parece subrayado
 				width = "block", -- fondo solo cubre el texto, no toda la línea
