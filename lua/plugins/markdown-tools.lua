@@ -15,6 +15,9 @@ return {
 			table = {
 				enabled = false,
 			},
+			bullet = {
+				enable = false,
+			},
 			heading = {
 				enabled = true,
 				backgrounds = {},
