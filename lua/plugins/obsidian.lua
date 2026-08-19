@@ -273,4 +273,17 @@ return {
 			{ desc = "Extraer selección a nota nueva" }
 		)
 	end,
+
+	-- Pretty markdown
+	{
+		"MeanderingProgrammer/render-markdown.nvim",
+		enable = true,
+		opts = {},
+		dependencies = { "nvim-treesitter/nvim-treesitter" },
+	},
+
+	{
+		-- markdown preview
+		"amcco/markdown-preview.nvim",
+	},
 }
