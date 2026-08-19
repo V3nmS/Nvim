@@ -78,6 +78,17 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 	end,
 })
 
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "markdown",
+	callback = function()
+		vim.opt_local.conceallevel = 2
+		vim.opt_local.wrap = true
+		vim.opt_local.linebreak = true -- corta en espacios, no a media palabra/celda
+		vim.opt_local.breakindent = true -- las líneas envueltas mantienen la indentación
+		vim.opt_local.showbreak = "↳ " -- marca visual de que la línea sigue
+	end,
+})
+
 -- Cargar plugins
 require("lazy").setup({
 	{ import = "plugins" },
