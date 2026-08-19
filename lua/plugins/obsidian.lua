@@ -117,7 +117,7 @@ return {
 			-- (ui.checkboxes). Si los redefines aquí salta un warning aunque
 			-- ya tengas checkbox.order, así que se dejan tal cual.
 			ui = {
-				enable = false, -- conceal de links, bullets, iconos
+				-- enable = false, -- conceal de links, bullets, iconos
 			},
 
 			footer = {
