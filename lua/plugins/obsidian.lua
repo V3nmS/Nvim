@@ -364,5 +364,32 @@ return {
 			-- o-O en modo normal también continúan la lista (no solo <CR> en insert)
 			vim.g.bullets_nested_checkboxes = 1
 		end,
+
+		config = function()
+			vim.g.bullets_enabled_file_types = { "markdown" }
+			vim.g.bullets_enable_in_empty_buffers = 0
+			vim.g.bullets_set_mappings = 1
+			vim.g.bullets_delete_last_bullet_if_empty = 1
+			vim.g.bullets_checkbox_markers = " ~!>x"
+			vim.g.bullets_renumber_on_change = 1
+			vim.g.bullets_nested_checkboxes = 1
+
+			-- bullets.vim mapea <CR> global en markdown, pero eso rompe las tablas
+			-- (mete un checkbox y desconecta el bloque para treesitter). Aquí lo
+			-- sobreescribimos DESPUÉS de que bullets.vim setea el suyo, para que
+			-- gane el nuestro: si la línea actual es de tabla, <CR> normal.
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "markdown",
+				callback = function(ev)
+					vim.keymap.set("i", "<CR>", function()
+						local line = vim.api.nvim_get_current_line()
+						if line:match("^%s*|") then
+							return "<CR>" -- fila de tabla: newline normal, sin bullets
+						end
+						return vim.fn["bullets#insert_new_line"]()
+					end, { buffer = ev.buf, expr = true, desc = "CR: tabla vs bullet" })
+				end,
+			})
+		end,
 	},
 }
