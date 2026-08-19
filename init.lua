@@ -78,6 +78,18 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 	end,
 })
 
+-- Wrap de nvim
+vim.opt.wrap = true
+vim.opt.linebreak = true -- corta bonito, no a mitad de palabra
+
+-- Wrap desactivado en markdown (para que las tablas no se corten feo)
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "markdown",
+	callback = function()
+		vim.opt_local.wrap = false
+	end,
+})
+
 -- Cargar plugins
 require("lazy").setup({
 	{ import = "plugins" },
