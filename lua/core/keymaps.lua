@@ -136,9 +136,6 @@ keymap.set("n", "<C-y>", "<C-r>") -- redo
 -- SELECCIONAR TODO (Ctrl + A)
 keymap.set("n", "<C-a>", "ggVG")
 
--- TABLE MODE --
-keymap.set("n", "<leader>tm", "<cmd>TableModeToggle<cr>", { desc = "Toggle table mode" })
-
 -- New tab terminal
 -- vim.keymap.set("n", "<leader>t", function()
 -- vim.cmd("tabnew | terminal")
