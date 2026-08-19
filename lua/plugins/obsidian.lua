@@ -277,7 +277,7 @@ return {
 	-- Pretty markdown
 	{
 		"MeanderingProgrammer/render-markdown.nvim",
-		enable = false,
+		enabled = false,
 		opts = {},
 		dependencies = { "nvim-treesitter/nvim-treesitter" },
 	},
