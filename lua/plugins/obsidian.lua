@@ -327,4 +327,28 @@ return {
 			})
 		end,
 	},
+
+	{
+		"dkarter/bullets.vim",
+		ft = { "markdown" },
+		init = function()
+			-- Solo listas de markdown, no lo actives global en todo filetype
+			vim.g.bullets_enabled_file_types = { "markdown" }
+
+			-- Enter dentro de una lista/checkbox crea la siguiente automático
+			vim.g.bullets_enable_in_empty_buffers = 0
+			vim.g.bullets_set_mappings = 1
+			vim.g.bullets_delete_last_bullet_if_empty = 1 -- Enter en bullet vacío = lo borra y sale de la lista (como Obsidian real)
+
+			-- Checkboxes: mismo ciclo que ya definiste en obsidian.nvim
+			-- (checkbox.order = " ", "~", "!", ">", "x")
+			vim.g.bullets_checkbox_markers = " ~!>x"
+
+			-- Renumera listas numeradas automático si agregas/borras en medio
+			vim.g.bullets_renumber_on_change = 1
+
+			-- o-O en modo normal también continúan la lista (no solo <CR> en insert)
+			vim.g.bullets_nested_checkboxes = 1
+		end,
+	},
 }
