@@ -318,6 +318,20 @@ return {
 		"dhruvasagar/vim-table-mode",
 		ft = { "markdown" },
 		config = function()
+			-- Silencia el "Table Mode Enabled" que imprime cada vez
+			vim.g.table_mode_verbose = 0
+
+			-- Silencia puntualmente el warning de vim.tbl_flatten (deprecado en 0.10,
+			-- table-mode aún no lo actualizó río arriba). Solo filtra ESE mensaje,
+			-- cualquier otro deprecation warning legítimo se sigue mostrando normal.
+			local orig_deprecate = vim.deprecate
+			vim.deprecate = function(name, ...)
+				if name == "vim.tbl_flatten" then
+					return
+				end
+				return orig_deprecate(name, ...)
+			end
+
 			vim.api.nvim_create_autocmd("FileType", {
 				pattern = "markdown",
 				group = vim.api.nvim_create_augroup("V3nomTableModeAuto", { clear = true }),
