@@ -24,8 +24,8 @@ vim.keymap.set("n", "<C-d>", "<C-d>zz", opts)
 vim.keymap.set("n", "<C-u>", "<C-u>zz", opts)
 
 -- Find and center
--- vim.keymap.set("n", "n", "nzzzv", opts)
--- vim.keymap.set("n", "N", "Nzzzv", opts)
+vim.keymap.set("n", "n", "nzzzv", opts)
+vim.keymap.set("n", "N", "Nzzzv", opts)
 
 -- Resize with arrows
 -- vim.keymap.set("n", "<C-A-Up>", ":horizontal resize -2<CR>", opts)
