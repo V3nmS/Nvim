@@ -25,6 +25,9 @@ vim.opt.linebreak = true -- corta bonito, no a mitad de palabra
 -- Autocompletado
 vim.cmd("filetype plugin indent on")
 
+-- Cursos
+vim.opt.guicursor = "a:block:blinkon0"
+
 vim.api.nvim_create_autocmd("TermOpen", {
 	pattern = "*",
 	command = "startinsert",
