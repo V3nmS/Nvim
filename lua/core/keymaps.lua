@@ -46,10 +46,10 @@ vim.keymap.set("n", "<leader>b", "<cmd> enew <CR>", opts) -- new buffer
 -- vim.keymap.set("n", "<leader>xs", ":close<CR>", opts) -- close current split window
 
 -- Navigate between splits
-vim.keymap.set("n", "<C-Up>", "<cmd>wincmd k<CR>", opts)
-vim.keymap.set("n", "<C-Down>", "<cmd>wincmd j<CR>", opts)
-vim.keymap.set("n", "<C-Left>", "<cmd>wincmd h<CR>", opts)
-vim.keymap.set("n", "<C-Right>", "<cmd>wincmd l<CR>", opts)
+vim.keymap.set("n", "<C-k>", "<cmd>wincmd k<CR>", opts)
+vim.keymap.set("n", "<C-j>", "<cmd>wincmd j<CR>", opts)
+vim.keymap.set("n", "<C-h>", "<cmd>wincmd h<CR>", opts)
+vim.keymap.set("n", "<C-l>", "<cmd>wincmd l<CR>", opts)
 
 -- Tabs
 -- vim.keymap.set("n", "<A-w>", ":tabclose<CR>", opts) -- close current tab
