@@ -74,6 +74,11 @@ function M.apply()
 	hl("RenderMarkdownUnchecked", { fg = c.dim })
 	hl("RenderMarkdownChecked", { fg = c.green })
 
+	-- Estados extra del ciclo de obsidian.nvim: [ ] -> [~] -> [!] -> [>] -> [x]
+	hl("RenderMarkdownTodo", { fg = c.yellow }) -- [~] en curso
+	hl("RenderMarkdownImportant", { fg = c.red, bold = true }) -- [!] urgente
+	hl("RenderMarkdownDeferred", { fg = c.blue }) -- [>] pospuesto
+
 	hl("@markup.quote.markdown", { fg = c.dim, italic = true })
 	hl("RenderMarkdownQuote", { fg = c.dim })
 	hl("RenderMarkdownDash", { fg = c.dim })
