@@ -29,28 +29,75 @@ return {
 		},
 
 		-- ============================================
-		-- Títulos: sin iconos, sin fondo, sin sign column
+		-- Títulos: los `#` desaparecen, queda solo el color
 		-- ============================================
-		-- El `# Título` se ve tal cual y el color lo pone treesitter desde
-		-- core/markdown-hl.lua (rampa rojo -> azul por nivel).
+		-- `icons` vacío + `position = "inline"` oculta el marcador `#` (y su
+		-- espacio) sin meter nada en su lugar: el título arranca en la columna
+		-- 0. Nada de iconos, fondos de bloque, bordes ni sign column.
 		--
-		-- Si algún día quieres esconder los `#` pero conservar el color, sin
-		-- volver a los bloques de fondo, cambia esto por:
-		--   heading = {
-		--     enabled = true, sign = false, icons = "", position = "overlay",
-		--     backgrounds = {}, border = false, width = "block",
-		--   }
-		heading = { enabled = false },
+		-- Detalle de implementación: el plugin solo oculta los `#` si el icono
+		-- NO es nil y hay al menos un grupo de highlight. Por eso `foregrounds`
+		-- se queda con el default (RenderMarkdownH1..H6, que colorea
+		-- core/markdown-hl.lua) mientras `backgrounds` va vacío.
+		--
+		-- Para volver a ver los `#`: `heading = { enabled = false }`.
+		heading = {
+			enabled = true,
+			sign = false,
+			icons = function()
+				return ""
+			end,
+			position = "inline",
+			backgrounds = {}, -- sin fondo de bloque
+			border = false,
+			width = "block",
+			left_pad = 0,
+			right_pad = 0,
+		},
 
 		-- ============================================
-		-- Viñetas: `-` de toda la vida, no los puntotes
+		-- Viñetas: `-` normal, con anidamiento distinguible
 		-- ============================================
-		-- Por defecto el plugin sustituye '-'|'+'|'*' por ● ○ ◆ ◇. Con un
-		-- string plano, cualquier marcador se dibuja como '-' en todos los
-		-- niveles. Si quieres distinguir anidamiento: { "-", "◦", "·" }.
+		-- Por defecto el plugin sustituye '-'|'+'|'*' por ● ○ ◆ ◇, todos
+		-- puntotes. Aquí manda lo que escribiste:
+		--
+		--   '-'  ->  rampa por nivel de anidamiento:  -  ◦  ▫
+		--   '*'  ->  siempre ◆   (marcador distinto a propósito)
+		--   '+'  ->  siempre ▸
+		--
+		-- Así, si anidas todo con '-' igual distingues el nivel; y si cambias
+		-- de marcador a mano, se respeta. Un solo carácter por icono, para no
+		-- correr el texto.
 		bullet = {
 			enabled = true,
-			icons = "-",
+			icons = function(ctx)
+				local marker = vim.trim(ctx.value)
+				if marker == "*" then
+					return "◆"
+				elseif marker == "+" then
+					return "▸"
+				end
+				local ramp = { "-", "◦", "▫" }
+				return ramp[math.min(ctx.level, #ramp)]
+			end,
+		},
+
+		-- ============================================
+		-- Checkboxes: el ciclo completo de obsidian.nvim
+		-- ============================================
+		-- Tu `checkbox.order` es { " ", "~", "!", ">", "x" }. Los dos extremos
+		-- ([ ] y [x]) están en la gramática de markdown; los tres de en medio
+		-- no, así que van como `custom` (match contra el texto crudo).
+		checkbox = {
+			enabled = true,
+			right_pad = 1,
+			unchecked = { icon = "󰄱 ", highlight = "RenderMarkdownUnchecked" },
+			checked = { icon = "󰱒 ", highlight = "RenderMarkdownChecked" },
+			custom = {
+				in_progress = { raw = "[~]", rendered = "󰥔 ", highlight = "RenderMarkdownTodo" },
+				important = { raw = "[!]", rendered = "󰀦 ", highlight = "RenderMarkdownImportant" },
+				deferred = { raw = "[>]", rendered = "󰅂 ", highlight = "RenderMarkdownDeferred" },
+			},
 		},
 
 		-- Sin `latex2text` instalado esto solo tira warnings en :checkhealth.
