@@ -84,6 +84,19 @@ function M.apply()
 	hl("RenderMarkdownDash", { fg = c.dim })
 
 	-- ------------------------------------------------------------
+	-- LaTeX
+	-- ------------------------------------------------------------
+	-- Las fórmulas renderizadas son virtual text, no texto real del buffer.
+	-- El morado es el único color de la paleta que no usa ningún otro
+	-- elemento de markdown: de un vistazo distingues "esto lo dibujó el
+	-- plugin" de "esto lo escribí yo".
+	hl("RenderMarkdownMath", { fg = c.purple, italic = true })
+
+	-- El `$...$` crudo (cuando el cursor entra y anti_conceal lo destapa)
+	-- en un tono apagado, para que el fuente no compita con el render.
+	hl("@markup.math", { fg = c.dim })
+
+	-- ------------------------------------------------------------
 	-- Tablas
 	-- ------------------------------------------------------------
 	hl("RenderMarkdownTableHead", { fg = c.blue })
