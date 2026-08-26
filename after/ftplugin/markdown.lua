@@ -10,7 +10,8 @@
 local tz = require("core.table-zoom")
 
 -- Scroll horizontal columna a columna en vez de a saltos de media pantalla.
-vim.opt_local.sidescroll = 1
+-- 'sidescroll' es global-only, no admite opt_local.
+vim.o.sidescroll = 1
 vim.opt_local.sidescrolloff = 6
 vim.opt_local.linebreak = true
 vim.opt_local.breakindent = true
