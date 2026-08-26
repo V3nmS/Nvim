@@ -117,8 +117,10 @@ return {
 				-- Los iconos/colores de checkbox vienen de los defaults del plugin
 				-- (ui.checkboxes). Si los redefines aquí salta un warning aunque
 				-- ya tengas checkbox.order, así que se dejan tal cual.
+				-- La UI la lleva render-markdown.nvim (tablas alineadas, headings,
+				-- code blocks). Si las dos están activas se pisan los extmarks.
 				ui = {
-					-- enable = false, -- conceal de links, bullets, iconos
+					enable = false,
 				},
 
 				footer = {

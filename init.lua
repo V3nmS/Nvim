@@ -19,6 +19,9 @@ vim.opt.rtp:prepend(lazypath)
 vim.opt.clipboard = "unnamedplus"
 
 -- Wrap de nvim
+-- OJO: esto pisa el `wrap = false` de core/options.lua (se carga después).
+-- Es a propósito: prosa con wrap. En markdown, after/ftplugin/markdown.lua
+-- lo apaga solo mientras el cursor está dentro de una tabla.
 vim.opt.wrap = true
 vim.opt.linebreak = true -- corta bonito, no a mitad de palabra
 
