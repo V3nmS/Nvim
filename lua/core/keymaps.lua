@@ -88,6 +88,36 @@ vim.keymap.set("n", "<leader><CR>", "o<Esc>", { noremap = true, silent = true })
 
 -- Python / C++ Keymap
 
+-- Resuelve el intérprete de Python sin depender de $PATH:
+-- 1) venv activo heredado por nvim, 2) .venv/venv del proyecto (subiendo
+-- desde el archivo), 3) ~/.venv de respaldo, 4) python3 del sistema.
+local function python_interpreter(file)
+	local candidates = {}
+
+	if vim.env.VIRTUAL_ENV then
+		table.insert(candidates, vim.env.VIRTUAL_ENV .. "/bin/python")
+	end
+
+	local found = vim.fs.find({ ".venv", "venv" }, {
+		upward = true,
+		type = "directory",
+		path = vim.fn.fnamemodify(file, ":h"),
+	})[1]
+	if found then
+		table.insert(candidates, found .. "/bin/python")
+	end
+
+	table.insert(candidates, vim.env.HOME .. "/.venv/bin/python")
+
+	for _, py in ipairs(candidates) do
+		if vim.fn.executable(py) == 1 then
+			return py
+		end
+	end
+
+	return "python3"
+end
+
 vim.keymap.set("n", "<F5>", function()
 	vim.cmd("w")
 	local ext = vim.fn.expand("%:e")
@@ -103,7 +133,8 @@ vim.keymap.set("n", "<F5>", function()
 			.. " && "
 			.. vim.fn.shellescape(output)
 	elseif ext == "py" then
-		cmd = "python3 " .. vim.fn.shellescape(file)
+		-- -u: salida sin buffer, para que los print aparezcan al instante
+		cmd = vim.fn.shellescape(python_interpreter(file)) .. " -u " .. vim.fn.shellescape(file)
 	else
 		print("No hay runner configurado para ." .. ext)
 		return
