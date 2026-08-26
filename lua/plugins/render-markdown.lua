@@ -100,42 +100,8 @@ return {
 			},
 		},
 
-		-- ============================================
-		-- LaTeX: fórmulas renderizadas dentro del buffer
-		-- ============================================
-		-- El plugin NO compila TeX. Manda el contenido de `$...$` / `$$...$$`
-		-- por stdin a un binario externo y pinta la salida como virtual lines.
-		-- Por eso no necesitas texlive ni un visor aparte.
-		--
-		-- `converter` es una lista y se prueba en orden hasta el primer éxito:
-		--   utftex     -> arte 2D de verdad (barras de fracción, ∫ grandes,
-		--                 matrices). Viene de libtexprintf (AUR).
-		--   latex2text -> fallback lineal, de python-pylatexenc (extra).
-		--
-		-- Si ninguno está instalado el handler se rinde en silencio y el
-		-- markdown se sigue viendo igual; `:checkhealth render-markdown` lo dice.
-		--
-		-- El resultado se cachea por fórmula, así que reabrir la nota no
-		-- vuelve a lanzar el proceso.
-		latex = {
-			enabled = true,
-			converter = { "utftex", "latex2text" },
-			inline = true, -- $x^2$ en medio del párrafo
-			block = true, -- $$ ... $$ en su propio bloque
-			highlight = "RenderMarkdownMath",
-
-			-- `center` = la fórmula de una línea sustituye al texto crudo en su
-			-- sitio; los bloques multilínea no caben centrados y el plugin cae
-			-- solo a `above`. Es lo que quieres para notas: inline discreto,
-			-- bloques dibujados encima del fuente.
-			position = "center",
-
-			-- OJO: dejar los pads en 0. El padding se mete en la salida ANTES
-			-- de decidir el centro, así que con pad > 0 una fórmula inline
-			-- también te abre líneas virtuales en blanco alrededor.
-			top_pad = 0,
-			bottom_pad = 0,
-		},
+		-- Sin `latex2text` instalado esto solo tira warnings en :checkhealth.
+		latex = { enabled = false },
 
 		code = {
 			enabled = true,
