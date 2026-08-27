@@ -40,6 +40,10 @@ return {
         maximum_padding = 5,
         maximum_length = 15,
         sort_by = 'insert_at_end',
+        -- Pinta solo los buffers del split enfocado (lua/core/bufscope.lua)
+        custom_filter = function(buf_number)
+          return require('core.bufscope').filter(buf_number)
+        end,
       },
       highlights = {
         separator = {

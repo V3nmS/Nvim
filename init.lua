@@ -1,6 +1,7 @@
 require("core.options")
 require("core.keymaps")
 require("core.snippets")
+require("core.bufscope") -- lista de buffers por split
 
 -- Instalar lazy.nvim si no existe
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"

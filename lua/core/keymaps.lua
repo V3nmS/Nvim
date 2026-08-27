@@ -33,10 +33,24 @@ vim.keymap.set("n", "<S-j>", ":horizontal resize +2<CR>", opts)
 vim.keymap.set("n", "<S-h>", ":vertical resize +2<CR>", opts)
 vim.keymap.set("n", "<S-l>", ":vertical resize -2<CR>", opts)
 
--- Buffers
-vim.keymap.set("n", "<Tab>", ":bnext<CR>", opts)
-vim.keymap.set("n", "<S-Tab>", ":bprevious<CR>", opts)
-vim.keymap.set("n", "<leader>x", ":bdelete!<CR>", opts) -- close buffer
+-- Buffers (con scope por split: ver lua/core/bufscope.lua)
+vim.keymap.set("n", "<Tab>", function()
+	require("core.bufscope").cycle(1)
+end, { noremap = true, silent = true, desc = "Siguiente buffer de este split" })
+
+vim.keymap.set("n", "<S-Tab>", function()
+	require("core.bufscope").cycle(-1)
+end, { noremap = true, silent = true, desc = "Buffer anterior de este split" })
+
+-- Saca el buffer de ESTE split; solo lo borra de verdad si ya no vive en otro
+vim.keymap.set("n", "<leader>x", function()
+	require("core.bufscope").close(true)
+end, { noremap = true, silent = true, desc = "Cerrar buffer en este split" })
+
+-- Ciclado global, por si necesito alcanzar un buffer que no está en este split
+vim.keymap.set("n", "<leader><Tab>", ":bnext<CR>", opts)
+vim.keymap.set("n", "<leader><S-Tab>", ":bprevious<CR>", opts)
+
 vim.keymap.set("n", "<leader>b", "<cmd> enew <CR>", opts) -- new buffer
 
 -- Window management
