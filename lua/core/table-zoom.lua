@@ -407,13 +407,20 @@ local function draw()
 		style = "minimal",
 		border = "rounded",
 		title = state.mode == "grid" and " Tabla · <Tab> tarjetas · q cerrar "
-			or " Tabla · <Tab> rejilla · q cerrar ",
+			or " Tabla · editable · <C-s> guardar · <Tab> rejilla · q cerrar ",
 		title_pos = "center",
 	}
 
+	-- La rejilla es solo lectura: sus columnas están padeadas a mano y editarlas
+	-- rompe el ancho. Las tarjetas sí se editan, y `M.save` las escribe de vuelta.
+	local editable = (state.mode == "cards")
+
 	vim.bo[state.buf].modifiable = true
 	vim.api.nvim_buf_set_lines(state.buf, 0, -1, false, lines)
-	vim.bo[state.buf].modifiable = false
+	vim.bo[state.buf].modifiable = editable
+	vim.bo[state.buf].modified = false
+
+	state.rendered = lines
 
 	if state.win and vim.api.nvim_win_is_valid(state.win) then
 		vim.api.nvim_win_set_config(state.win, cfg)
@@ -451,9 +458,17 @@ function M.zoom()
 	end
 
 	state.tbl = tbl
+	state.src_buf = buf
+	state.src_s = s
+	state.src_e = e
+	state.indent = vim.api.nvim_buf_get_lines(buf, s - 1, s, false)[1]:match("^%s*")
+
 	state.buf = vim.api.nvim_create_buf(false, true)
 	vim.bo[state.buf].bufhidden = "wipe"
 	vim.bo[state.buf].filetype = "mdtablezoom"
+	-- `acwrite` para que `:w` dispare BufWriteCmd en vez de quejarse.
+	vim.bo[state.buf].buftype = "acwrite"
+	vim.api.nvim_buf_set_name(state.buf, "mdtable://" .. vim.api.nvim_buf_get_name(buf))
 
 	draw()
 
@@ -566,10 +581,12 @@ function M.save()
 	-- La tabla pudo cambiar de altura: mueve el rango para el siguiente guardado.
 	state.src_e = state.src_s + #out - 1
 
-	if state.buf and vim.api.nvim_buf_is_valid(state.buf) then
-		vim.bo[state.buf].modified = false
-	end
+	local cur = state.win and vim.api.nvim_win_is_valid(state.win) and vim.api.nvim_win_get_cursor(state.win)
 	draw()
+	if cur and state.win and vim.api.nvim_win_is_valid(state.win) then
+		local last = vim.api.nvim_buf_line_count(state.buf)
+		pcall(vim.api.nvim_win_set_cursor, state.win, { math.min(cur[1], last), cur[2] })
+	end
 
 	vim.notify(("Tabla escrita: %d filas."):format(#state.tbl.rows))
 end
