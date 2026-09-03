@@ -374,6 +374,12 @@ end
 
 local ns = vim.api.nvim_create_namespace("mdtablezoom")
 
+-- El flotante usa filetype propio para no heredar el ftplugin de markdown ni
+-- sus keymaps. El precio es que nada resuelve el parser por filetype, así que
+-- se asocia a mano: sin esto `vim.treesitter.start` engancha el highlighter
+-- pero las consultas por posición no encuentran árbol y no se pinta nada.
+pcall(vim.treesitter.language.register, "markdown_inline", "mdtablezoom")
+
 -- Los caracteres de dibujo de caja viven en U+2500..U+257F, o sea que en UTF-8
 -- todos empiezan con el prefijo de dos bytes E2 94 o E2 95. Buscarlos por
 -- prefijo evita clases de patrón Lua, que trabajan por byte y partirían el
