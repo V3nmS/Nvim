@@ -13,7 +13,19 @@
 
 local M = {}
 
-local state = { win = nil, buf = nil, mode = "grid", tbl = nil }
+local state = {
+	win = nil,
+	buf = nil,
+	mode = "grid",
+	tbl = nil,
+	-- De dónde salió la tabla, para poder escribirla de vuelta.
+	src_buf = nil,
+	src_s = nil,
+	src_e = nil,
+	indent = "",
+	-- Snapshot de lo último dibujado, para saber si hay ediciones sin guardar.
+	rendered = nil,
+}
 
 -- Ancho en celdas de pantalla, no en bytes: cuenta bien acentos, CJK y emoji.
 local function dw(s)
@@ -276,6 +288,84 @@ local function render_cards(tbl, width)
 		table.remove(out)
 	end
 	return out
+end
+
+-- ------------------------------------------------------------
+-- Parseo inverso: tarjetas editadas -> filas
+-- ------------------------------------------------------------
+-- El render de tarjetas es `Header │ texto`, con la etiqueta en blanco en las
+-- líneas de continuación. Aquí se deshace: una tarjeta empieza en su regla
+-- `── n ─────`, cada etiqueta conocida abre un campo, y toda línea con la
+-- etiqueta vacía se pega al campo abierto con un espacio.
+--
+-- Limitación consciente: una celda que contenga `│` literal no sobrevive el
+-- viaje de ida y vuelta. Es el único carácter prohibido dentro de una celda.
+
+local function parse_cards(lines, header, ncols)
+	local by_label = {}
+	for i, h in ipairs(header) do
+		by_label[vim.trim(h)] = i
+	end
+
+	local rows, cur, cur_idx = {}, nil, nil
+
+	local function flush()
+		if cur then
+			-- Una tarjeta totalmente vacía se descarta: es una fila borrada.
+			local any = false
+			for i = 1, ncols do
+				if cur[i] ~= "" then
+					any = true
+					break
+				end
+			end
+			if any then
+				rows[#rows + 1] = cur
+			end
+		end
+		cur, cur_idx = nil, nil
+	end
+
+	for _, line in ipairs(lines) do
+		if line:match("^%s*──") then
+			flush()
+			cur = {}
+			for i = 1, ncols do
+				cur[i] = ""
+			end
+		elseif cur then
+			local label, text = line:match("^(.-)│(.*)$")
+			if label then
+				label = vim.trim(label)
+				text = vim.trim(text)
+				local idx = by_label[label]
+				if label ~= "" and idx then
+					cur_idx = idx
+					cur[idx] = text
+				elseif label == "" and cur_idx and text ~= "" then
+					cur[cur_idx] = (cur[cur_idx] ~= "") and (cur[cur_idx] .. " " .. text) or text
+				end
+			end
+		end
+	end
+	flush()
+
+	return rows
+end
+
+-- Lee el buffer flotante en modo tarjetas y mete las ediciones en state.tbl.
+local function sync_from_cards()
+	if state.mode ~= "cards" or not (state.buf and vim.api.nvim_buf_is_valid(state.buf)) then
+		return false
+	end
+	local lines = vim.api.nvim_buf_get_lines(state.buf, 0, -1, false)
+	local rows = parse_cards(lines, state.tbl.header, state.tbl.ncols)
+	if #rows == 0 then
+		vim.notify("No pude leer ninguna tarjeta; no toqué el archivo.", vim.log.levels.WARN)
+		return false
+	end
+	state.tbl.rows = rows
+	return true
 end
 
 -- ------------------------------------------------------------
