@@ -261,11 +261,16 @@ local function wrap_text(s, width)
 	return out
 end
 
-local function render_cards(tbl, width)
+local function label_width(tbl)
 	local label_w = 0
 	for i = 1, tbl.ncols do
 		label_w = math.max(label_w, dw(tbl.header[i]))
 	end
+	return label_w
+end
+
+local function render_cards(tbl, width)
+	local label_w = label_width(tbl)
 	local text_w = math.max(width - label_w - 4, 20)
 	local out = {}
 
@@ -505,7 +510,21 @@ local function draw()
 	end
 
 	local wo = vim.wo[state.win]
-	wo.wrap = false
+
+	-- En tarjetas cada renglón es `Etiqueta │ texto`: solo hay un borde de
+	-- columna, así que el wrap suave no rompe ninguna alineación y el texto baja
+	-- solo mientras se escribe, sin tener que guardar para verlo. `breakindent`
+	-- con `shift` empuja la continuación hasta debajo de la columna de texto,
+	-- para que quede a plomo con la barra. La rejilla sigue sin wrap: ahí el
+	-- padding es a mano y cortar una fila la desalinea entera.
+	local cards = (state.mode == "cards")
+	wo.wrap = cards
+	wo.linebreak = cards
+	wo.breakindent = cards
+	if cards then
+		wo.breakindentopt = "shift:" .. (label_width(state.tbl) + 3)
+	end
+
 	wo.cursorline = true
 	wo.number = false
 	wo.relativenumber = false
