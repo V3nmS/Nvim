@@ -372,6 +372,70 @@ end
 -- Ventana flotante
 -- ------------------------------------------------------------
 
+local ns = vim.api.nvim_create_namespace("mdtablezoom")
+
+-- Los caracteres de dibujo de caja viven en U+2500..U+257F, o sea que en UTF-8
+-- todos empiezan con el prefijo de dos bytes E2 94 o E2 95. Buscarlos por
+-- prefijo evita clases de patrón Lua, que trabajan por byte y partirían el
+-- carácter a la mitad.
+local function each_box_char(line, fn)
+	local i = 1
+	while i <= #line do
+		local a = line:find("\226\148", i, true)
+		local b = line:find("\226\149", i, true)
+		if a and b then
+			a = math.min(a, b)
+		else
+			a = a or b
+		end
+		if not a then
+			return
+		end
+		fn(a - 1, a + 2) -- [col0, end_col) en bytes
+		i = a + 3
+	end
+end
+
+-- Colorea el "chrome" (reglas, barras, etiquetas). El texto de las celdas lo
+-- pinta treesitter con el parser markdown_inline, así que backticks, negritas
+-- y enlaces se ven igual que en el buffer real.
+local function highlight(buf, lines, mode)
+	vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+
+	local function mark(row, col, end_col, group, prio)
+		if end_col > col then
+			pcall(vim.api.nvim_buf_set_extmark, buf, ns, row, col, {
+				end_col = end_col,
+				hl_group = group,
+				priority = prio,
+			})
+		end
+	end
+
+	for i, line in ipairs(lines) do
+		local row = i - 1
+
+		if mode == "cards" and line:match("^%s*──") then
+			-- La regla que abre cada tarjeta: se lee como separador, no como dato.
+			mark(row, 0, #line, "Comment", 200)
+		elseif mode == "cards" then
+			local bar = line:find("\226\148\130", 1, true) -- │
+			if bar then
+				mark(row, 0, bar - 1, "Title", 150)
+				mark(row, bar - 1, bar + 2, "FloatBorder", 200)
+			end
+		else
+			-- Rejilla: toda la caja en el color del borde; el encabezado en Title.
+			if row == 1 then
+				mark(row, 0, #line, "Title", 150)
+			end
+			each_box_char(line, function(c, e)
+				mark(row, c, e, "FloatBorder", 200)
+			end)
+		end
+	end
+end
+
 local function close()
 	if state.win and vim.api.nvim_win_is_valid(state.win) then
 		vim.api.nvim_win_close(state.win, true)
@@ -421,6 +485,12 @@ local function draw()
 	vim.bo[state.buf].modified = false
 
 	state.rendered = lines
+
+	-- markdown_inline pinta el contenido de las celdas con los mismos grupos que
+	-- usa el buffer real; el ftplugin de markdown no se dispara porque el
+	-- filetype es propio, así que no hereda sus autocmds ni sus keymaps.
+	pcall(vim.treesitter.start, state.buf, "markdown_inline")
+	highlight(state.buf, lines, state.mode)
 
 	if state.win and vim.api.nvim_win_is_valid(state.win) then
 		vim.api.nvim_win_set_config(state.win, cfg)
