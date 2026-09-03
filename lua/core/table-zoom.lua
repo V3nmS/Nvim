@@ -482,21 +482,8 @@ end
 -- Formatear la tabla en el buffer real
 -- ------------------------------------------------------------
 
-function M.format()
-	local buf = vim.api.nvim_get_current_buf()
-	local lnum = vim.api.nvim_win_get_cursor(0)[1]
-
-	local s, e = table_range(buf, lnum)
-	if not s then
-		vim.notify("El cursor no está sobre una tabla markdown.", vim.log.levels.WARN)
-		return
-	end
-
-	local tbl = parse_table(vim.api.nvim_buf_get_lines(buf, s - 1, e, false))
-	if not tbl then
-		return
-	end
-
+-- Rinde la tabla como markdown alineado, con la indentación original.
+local function format_lines(tbl, indent)
 	local w = col_widths(tbl)
 	for i = 1, tbl.ncols do
 		w[i] = math.max(w[i], 3) -- el separador necesita `---` mínimo
@@ -506,7 +493,7 @@ function M.format()
 		local parts = {}
 		for i = 1, tbl.ncols do
 			local a = aligned and tbl.aligns[i] or "left"
-			parts[i] = " " .. pad(cells[i], w[i], a) .. " "
+			parts[i] = " " .. pad(cells[i] or "", w[i], a) .. " "
 		end
 		return "|" .. table.concat(parts, "|") .. "|"
 	end
@@ -528,16 +515,63 @@ function M.format()
 		out[#out + 1] = row(r, true)
 	end
 
-	-- Conserva la indentación original de la tabla.
-	local indent = vim.api.nvim_buf_get_lines(buf, s - 1, s, false)[1]:match("^%s*")
-	if indent ~= "" then
+	if indent and indent ~= "" then
 		for i, l in ipairs(out) do
 			out[i] = indent .. l
 		end
 	end
 
+	return out
+end
+
+function M.format()
+	local buf = vim.api.nvim_get_current_buf()
+	local lnum = vim.api.nvim_win_get_cursor(0)[1]
+
+	local s, e = table_range(buf, lnum)
+	if not s then
+		vim.notify("El cursor no está sobre una tabla markdown.", vim.log.levels.WARN)
+		return
+	end
+
+	local tbl = parse_table(vim.api.nvim_buf_get_lines(buf, s - 1, e, false))
+	if not tbl then
+		return
+	end
+
+	local indent = vim.api.nvim_buf_get_lines(buf, s - 1, s, false)[1]:match("^%s*")
+	local out = format_lines(tbl, indent)
+
 	vim.api.nvim_buf_set_lines(buf, s - 1, e, false, out)
 	vim.notify(("Tabla alineada (%d columnas, %d filas)"):format(tbl.ncols, #tbl.rows))
+end
+
+-- ------------------------------------------------------------
+-- Guardar: tarjetas editadas -> tabla en el buffer real
+-- ------------------------------------------------------------
+
+function M.save()
+	if not (state.src_buf and vim.api.nvim_buf_is_valid(state.src_buf)) then
+		vim.notify("El buffer original ya no existe; no guardé nada.", vim.log.levels.ERROR)
+		return
+	end
+
+	if state.mode == "cards" and not sync_from_cards() then
+		return
+	end
+
+	local out = format_lines(state.tbl, state.indent)
+	vim.api.nvim_buf_set_lines(state.src_buf, state.src_s - 1, state.src_e, false, out)
+
+	-- La tabla pudo cambiar de altura: mueve el rango para el siguiente guardado.
+	state.src_e = state.src_s + #out - 1
+
+	if state.buf and vim.api.nvim_buf_is_valid(state.buf) then
+		vim.bo[state.buf].modified = false
+	end
+	draw()
+
+	vim.notify(("Tabla escrita: %d filas."):format(#state.tbl.rows))
 end
 
 -- Expuesto para el ftplugin: ¿el cursor está dentro de una tabla?
