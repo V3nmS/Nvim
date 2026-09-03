@@ -59,7 +59,11 @@ map("<leader>tw", function()
 		sync_wrap()
 		vim.notify("Wrap automático en tablas: ON")
 	else
-		vim.notify("Wrap automático en tablas: OFF (wrap = " .. tostring(vim.wo.wrap) .. ")")
+		-- Apagar el automático significa "quiero wrap siempre", tabla incluida.
+		-- Sin esto, apagarlo estando parado en una fila dejaba wrap = false y el
+		-- toggle parecía no hacer nada.
+		vim.wo.wrap = true
+		vim.notify("Wrap automático en tablas: OFF (wrap forzado a ON)")
 	end
 end, "Tabla: toggle wrap automático")
 
