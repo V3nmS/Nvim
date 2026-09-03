@@ -473,12 +473,62 @@ function M.zoom()
 	draw()
 
 	local opts = { buffer = state.buf, nowait = true, silent = true }
-	vim.keymap.set("n", "q", close, opts)
-	vim.keymap.set("n", "<Esc>", close, opts)
+
+	-- ¿El buffer difiere de lo último que dibujamos?
+	local function dirty()
+		if state.mode ~= "cards" or not state.rendered then
+			return false
+		end
+		local now = vim.api.nvim_buf_get_lines(state.buf, 0, -1, false)
+		if #now ~= #state.rendered then
+			return true
+		end
+		for i, l in ipairs(now) do
+			if l ~= state.rendered[i] then
+				return true
+			end
+		end
+		return false
+	end
+
+	local function close_checked()
+		if dirty() then
+			local pick = vim.fn.confirm("Hay ediciones sin guardar en las tarjetas.", "&Guardar\n&Descartar\n&Cancelar", 3)
+			if pick == 1 then
+				M.save()
+			elseif pick ~= 2 then
+				return
+			end
+		end
+		close()
+	end
+
+	vim.keymap.set("n", "q", close_checked, opts)
+	vim.keymap.set("n", "<Esc>", close_checked, opts)
+	vim.keymap.set({ "n", "i" }, "<C-s>", function()
+		if state.mode ~= "cards" then
+			vim.notify("La rejilla es solo lectura. <Tab> para pasar a tarjetas.", vim.log.levels.WARN)
+			return
+		end
+		vim.cmd("stopinsert")
+		M.save()
+	end, opts)
 	vim.keymap.set("n", "<Tab>", function()
+		-- Cambiar de modo redibuja; sin esto, las ediciones de las tarjetas se
+		-- perderían al pasar a rejilla.
+		if state.mode == "cards" then
+			sync_from_cards()
+		end
 		state.mode = (state.mode == "grid") and "cards" or "grid"
 		draw()
 	end, opts)
+
+	vim.api.nvim_create_autocmd("BufWriteCmd", {
+		buffer = state.buf,
+		callback = function()
+			M.save()
+		end,
+	})
 	-- Scroll horizontal rápido (dentro del flotante gana sobre el resize global).
 	vim.keymap.set("n", "H", "10zh", opts)
 	vim.keymap.set("n", "L", "10zl", opts)
