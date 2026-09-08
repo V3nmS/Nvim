@@ -20,7 +20,12 @@ return { -- Autocompletion
 				{
 					"rafamadriz/friendly-snippets",
 					config = function()
+						-- Snippets premade de friendly-snippets
 						require("luasnip.loaders.from_vscode").lazy_load()
+						-- Mis propios snippets: ~/.config/nvim/snippets/
+						require("luasnip.loaders.from_vscode").lazy_load({
+							paths = { vim.fn.stdpath("config") .. "/snippets" },
+						})
 					end,
 				},
 			},

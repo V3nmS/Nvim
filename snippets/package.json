@@ -1,0 +1,13 @@
+{
+  "name": "v3nom-snippets",
+  "version": "1.0.0",
+  "engines": { "vscode": "^1.11.0" },
+  "contributes": {
+    "snippets": [
+      {
+        "language": "cpp",
+        "path": "./cpp.json"
+      }
+    ]
+  }
+}
