@@ -13,13 +13,18 @@ return {
 		-- Con el cursor encima de un elemento se ve el texto crudo, para editarlo.
 		anti_conceal = { enabled = true },
 
+		-- Visual incluido: si no, al seleccionar baja el conceallevel y las
+		-- tablas de md-table-wrap se deshacen a markdown crudo.
+		render_modes = { "n", "c", "t", "v", "V", "\22" },
+
 		-- ============================================
-		-- Tablas: lo que resuelve el problema original
+		-- Tablas: las dibuja md-table-wrap.nvim
 		-- ============================================
-		-- El texto fuente puede tener los pipes desalineados; esto los dibuja
-		-- alineados de todas formas, con bordes reales en vez de `|` y `---`.
+		-- Apagado a propósito: con wrap = true este render parte las filas
+		-- (ver lua/plugins/md-table-wrap.lua). El resto se queda por si algún
+		-- día se vuelve a prender.
 		pipe_table = {
-			enabled = true,
+			enabled = false,
 			preset = "round", -- esquinas ╭ ╮ ╰ ╯
 			style = "full", -- dibuja también el borde exterior
 			cell = "trimmed", -- recorta padding sobrante: la tabla ocupa lo mínimo
