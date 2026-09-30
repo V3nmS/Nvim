@@ -12,5 +12,18 @@
       "}"
     ],
     "description": "Template base de programacion competitiva"
+  },
+  "Software Engeneer": {
+    "prefix": "SCP",
+    "body": [
+      "using namespace std;",
+      "",
+      "int main()",
+      "{",
+      "    $0",
+      "    return 0;",
+      "}"
+    ],
+    "description": "Template base de Software"
   }
 }
